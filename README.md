@@ -1,11 +1,10 @@
-# smgw-cms-file-converter
+# smgw-cms-data-extractor
+
 **DE: Python-Skript zur Umwandlung von CMS-Dateien eines Smart Meter Gateways (SMGW/iMSys) in strukturierte Excel- und CSV-Dateien mit Tageswerten**
 
 **EN: Python script to convert German Smart Meter Gateway (aka SMGW/iMSys) cms-files into structured Excel and CSV files with daily values.**
 
 ---
-
-## Deutsch
 
 ### Was das Skript macht
 
@@ -70,103 +69,34 @@ Der Gesamtverbrauch ist damit rechnerisch identisch zu:
 
 wird aber direkt aus den beiden Tagesrandwerten berechnet.
 
----
+## Voraussetzungen
 
-## English
+### Betriebssystem
 
-### What this script does
+Empfohlen:
 
-This script reads a CMS-wrapped SMGW export file such as:
+- **Windows 10 oder Windows 11**
 
-`meter_id.sm_data.xml.cms`
-
-It extracts the embedded XML meter data, parses the cumulative import meter readings, and generates:
-
-- an **Excel workbook** (`.xlsx`)
-- a **CSV file** (`.csv`)
-
-The Excel output contains:
-
-- **Daily end values**
-- **Tariff zone calculations** for **Intelligent Octopus Go**
-  - **Go time:** 00:00 to 05:00
-  - **Standard time:** 05:00 to 24:00
-
-The script is designed for German smart meter HAN exports where timestamps are stored in **UTC** and meter values are provided as cumulative counters.
-
-### Definition of the daily end value
-
-The script defines the **daily end value** as:
-
-> the **first available cumulative meter reading at 00:00 local time of the following day**, assigned to the previous day.
-
-Example:
-
-- Reading at `2026-03-21 00:00:03` local time
-- This is treated as the **daily end value for 2026-03-20**
-
-Why this method is used:
-
-A reading at `23:45` does **not** yet include the last 15 minutes before midnight.  
-The first reading at `00:00` of the next day is the cleanest end-of-day value for a cumulative meter register.
-
-### Tariff zone logic
-
-For the tariff sheet, the script assumes a **calendar day** from `00:00` to `24:00`.
-
-For each day it uses these three cumulative import meter readings:
-
-- `00:00` local time
-- `05:00` local time
-- `00:00` local time of the following day
-
-From these values it calculates:
-
-- **Octopus Go consumption (00:00–05:00)**  
-  `reading at 05:00 - reading at 00:00`
-
-- ****Octopus Standard consumption (05:00–24:00)**  
-  `reading at next day's 00:00 - reading at 05:00`
-
-- **Total daily consumption (00:00–24:00)**  
-  `reading at next day's 00:00 - reading at 00:00`
-
-So the total daily consumption is mathematically identical to:
-
-`Go consumption + Standard consumption`
-
-but it is calculated directly from the two daily boundary values.
-
----
-
-## Requirements / Voraussetzungen
-
-### Operating system
-
-Recommended:
-
-- **Windows 10 or Windows 11**
-
-The script should also run on Linux or macOS, but the instructions below are written for Windows.
+Das Skript sollte auch unter Linux oder macOS laufen, aber die nachfolgenden Hinweise beziehen sich auf Windows.
 
 ### Python
 
-Required:
+Erforderlich:
 
-- **Python 3.10 or newer**
+- **Python 3.10 oder neuer**
 
-You also need the Python package:
+Außerdem wird folgendes Python-Paket benötigt:
 
 - `openpyxl`
 
-Install it with:
+Installation:
 
 ```bash
 pip install openpyxl
 ```
 
-The script contains a built-in fallback for **Europe/Berlin** timezone handling if `tzdata` is not installed.  
-Installing `tzdata` is optional, but can still be useful on some systems:
+Das Skript enthält eine eingebaute Fallback-Logik für die Zeitzone **Europe/Berlin**, falls `tzdata` nicht installiert ist.  
+Die Installation von `tzdata` ist optional, kann aber auf manchen Systemen trotzdem sinnvoll sein:
 
 ```bash
 pip install tzdata
@@ -174,9 +104,9 @@ pip install tzdata
 
 ---
 
-## Input file
+## Eingabedatei
 
-The script expects a CMS export file from the smart meter, for example:
+Das Skript erwartet eine CMS-Exportdatei des Smart Meters, zum Beispiel:
 
 ```text
 Zählerstände-2026-01-01 bis_2026-03-21_1lgz0072999211.sm_data.xml.cms
@@ -184,15 +114,15 @@ Zählerstände-2026-01-01 bis_2026-03-21_1lgz0072999211.sm_data.xml.cms
 
 ---
 
-## Usage / Verwendung
+## Verwendung
 
-### Basic command
+### Grundlegender Aufruf
 
 ```bash
 python smgw_cms_data_extractor.py "Zählerstände-2026-01-01 bis_2026-03-21_1lgz0072999211.sm_data.xml.cms"
 ```
 
-### With explicit output file name
+### Mit explizitem Ausgabedateinamen
 
 ```bash
 python smgw_cms_data_extractor.py "Zählerstände-2026-01-01 bis_2026-03-21_1lgz0072999211.sm_data.xml.cms" -o "output.xlsx"
@@ -200,72 +130,68 @@ python smgw_cms_data_extractor.py "Zählerstände-2026-01-01 bis_2026-03-21_1lgz
 
 ---
 
-## Output files
+## Ausgabedateien
 
-The script creates:
+Das Skript erzeugt:
 
-- an Excel file (`.xlsx`)
-- a CSV file (`.csv`)
+- eine Excel-Datei (`.xlsx`)
+- eine CSV-Datei (`.csv`)
 
-### Excel structure
+### Aufbau der Excel-Datei
 
-The Excel workbook contains at least these sheets:
+Die Excel-Arbeitsmappe enthält mindestens diese Tabellenblätter:
 
-#### 1. `Tagesendwerte`
+#### `Tagesendwerte`
 
-Contains the daily end values.
+Typische Spalten:
 
-Typical columns:
+- Datum
+- Verwendeter lokaler Zeitstempel
+- Bezugszählerstand (1.8.0) in kWh
+- Einspeisezählerstand (2.8.0) in kWh
 
-- Date / Datum
-- Used local timestamp
-- Import reading (1.8.0) in kWh
-- Export reading (2.8.0) in kWh
+#### `Tarifzonen`
 
-#### 2. `Tarifzonen`
+Typische Spalten:
 
-Contains the tariff-relevant import readings and calculated daily consumption split.
-
-Typical columns:
-
-- Date / Datum
-- Local timestamp 00:00
-- Local timestamp 05:00
-- Local timestamp next day 00:00
-- Import reading at 00:00
-- Import reading at 05:00
-- Import reading at next day 00:00
-- Go consumption 00:00–05:00
-- Standard consumption 05:00–24:00
-- Total daily consumption 00:00–24:00
+- Datum
+- Lokaler Zeitstempel 00:00
+- Lokaler Zeitstempel 05:00
+- Lokaler Zeitstempel Folgetag 00:00
+- Bezugszählerstand um 00:00
+- Bezugszählerstand um 05:00
+- Bezugszählerstand um Folgetag 00:00
+- Octopus Go-Verbrauch 00:00–05:00
+- Octopus Standard-Verbrauch 05:00–24:00
+- Gesamtverbrauch 00:00–24:00
 
 ---
 
-## Example workflow on Windows
+## Beispielhafter Ablauf unter Windows
 
-1. Install Python
-2. Install `openpyxl`
-3. Save the script as `smgw_cms_data_extractor.py`
-4. Copy your `.sm_data.xml.cms` file into the same folder
-5. Open Command Prompt in that folder
-6. Run:
+1. Python installieren
+2. `openpyxl` installieren
+3. Das Skript als `smgw_cms_data_extractor.py` speichern
+4. Die `.sm_data.xml.cms`-Datei in denselben Ordner kopieren
+5. In diesem Ordner die Eingabeaufforderung öffnen
+6. Folgenden Befehl ausführen:
 
 ```bash
 python smgw_cms_data_extractor.py "your_file.sm_data.xml.cms"
 ```
 
-7. Open the generated Excel file in Excel
+7. Die erzeugte Excel-Datei in Excel öffnen
 
 ---
 
-## Notes
+## Hinweise
 
-- The script is intended for **German SMGW CMS export files**
-- It currently focuses on **cumulative import readings** for daily and tariff calculations
-- The tariff logic is tailored to **Intelligent Octopus Go (00:00–05:00)**
+- Das Skript ist für **deutsche SMGW-CMS-Exportdateien** gedacht
+- Der Schwerpunkt liegt derzeit auf **kumulativen Bezugszählerständen** für Tages- und Tarifberechnungen
+- Die Tariflogik ist auf **Intelligent Octopus Go (00:00–05:00)** zugeschnitten
 
 ---
 
-## License
+## Lizenz
 
 MIT
