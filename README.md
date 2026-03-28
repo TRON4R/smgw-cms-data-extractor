@@ -194,4 +194,4 @@ python smgw_cms_data_extractor.py "your_file.sm_data.xml.cms"
 
 ## Lizenz
 
-MIT
+MIT License — see [LICENSE](LICENSE) for details.
