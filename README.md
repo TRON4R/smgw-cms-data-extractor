@@ -1,73 +1,7 @@
 # smgw-cms-data-extractor
 
-**Python script to extract daily meter values from a German Smart Meter Gateway (SMGW / iMSys) CMS data export and generate structured Excel and CSV files.**
-
----
-
-## English
-
-### What this script does
-
-This script reads a CMS-wrapped SMGW export file such as:
-
-`*.sm_data.xml.cms`
-
-It extracts the embedded XML meter data, parses the cumulative import meter readings, and generates:
-
-- an **Excel workbook** (`.xlsx`)
-- a **CSV file** (`.csv`)
-
-The Excel output contains:
-
-- **Daily end values**
-- **Tariff zone calculations** for **Intelligent Octopus Go**
-  - **Go time:** 00:00 to 05:00
-  - **Standard time:** 05:00 to 24:00
-
-The script is designed for German smart meter HAN exports where timestamps are stored in **UTC** and meter values are provided as cumulative counters.
-
-### Definition of the daily end value
-
-The script defines the **daily end value** as:
-
-> the **first available cumulative meter reading at 00:00 local time of the following day**, assigned to the previous day.
-
-Example:
-
-- Reading at `2026-03-21 00:00:03` local time
-- This is treated as the **daily end value for 2026-03-20**
-
-Why this method is used:
-
-A reading at `23:45` does **not** yet include the last 15 minutes before midnight.  
-The first reading at `00:00` of the next day is the cleanest end-of-day value for a cumulative meter register.
-
-### Tariff zone logic
-
-For the tariff sheet, the script assumes a **calendar day** from `00:00` to `24:00`.
-
-For each day it uses these three cumulative import meter readings:
-
-- `00:00` local time
-- `05:00` local time
-- `00:00` local time of the following day
-
-From these values it calculates:
-
-- **Go consumption (00:00–05:00)**  
-  `reading at 05:00 - reading at 00:00`
-
-- **Standard consumption (05:00–24:00)**  
-  `reading at next day's 00:00 - reading at 05:00`
-
-- **Total daily consumption (00:00–24:00)**  
-  `reading at next day's 00:00 - reading at 00:00`
-
-So the total daily consumption is mathematically identical to:
-
-`Go consumption + Standard consumption`
-
-but it is calculated directly from the two daily boundary values.
+**DE: Python-Skript zur Umwandlung von CMS-Dateien eines Smart Meter Gateways (SMGW/iMSys) in strukturierte Excel- und CSV-Dateien mit Tageswerten**
+**EN: Python script to convert German Smart Meter Gateway (aka SMGW/iMSys) cms-files into structured Excel and CSV files with daily values.**
 
 ---
 
@@ -135,6 +69,73 @@ Der Gesamtverbrauch ist damit rechnerisch identisch zu:
 `Go-Verbrauch + Standard-Verbrauch`
 
 wird aber direkt aus den beiden Tagesrandwerten berechnet.
+
+---
+
+## English
+
+### What this script does
+
+This script reads a CMS-wrapped SMGW export file such as:
+
+`*.sm_data.xml.cms`
+
+It extracts the embedded XML meter data, parses the cumulative import meter readings, and generates:
+
+- an **Excel workbook** (`.xlsx`)
+- a **CSV file** (`.csv`)
+
+The Excel output contains:
+
+- **Daily end values**
+- **Tariff zone calculations** for **Intelligent Octopus Go**
+  - **Go time:** 00:00 to 05:00
+  - **Standard time:** 05:00 to 24:00
+
+The script is designed for German smart meter HAN exports where timestamps are stored in **UTC** and meter values are provided as cumulative counters.
+
+### Definition of the daily end value
+
+The script defines the **daily end value** as:
+
+> the **first available cumulative meter reading at 00:00 local time of the following day**, assigned to the previous day.
+
+Example:
+
+- Reading at `2026-03-21 00:00:03` local time
+- This is treated as the **daily end value for 2026-03-20**
+
+Why this method is used:
+
+A reading at `23:45` does **not** yet include the last 15 minutes before midnight.  
+The first reading at `00:00` of the next day is the cleanest end-of-day value for a cumulative meter register.
+
+### Tariff zone logic
+
+For the tariff sheet, the script assumes a **calendar day** from `00:00` to `24:00`.
+
+For each day it uses these three cumulative import meter readings:
+
+- `00:00` local time
+- `05:00` local time
+- `00:00` local time of the following day
+
+From these values it calculates:
+
+- **Go consumption (00:00–05:00)**  
+  `reading at 05:00 - reading at 00:00`
+
+- **Standard consumption (05:00–24:00)**  
+  `reading at next day's 00:00 - reading at 05:00`
+
+- **Total daily consumption (00:00–24:00)**  
+  `reading at next day's 00:00 - reading at 00:00`
+
+So the total daily consumption is mathematically identical to:
+
+`Go consumption + Standard consumption`
+
+but it is calculated directly from the two daily boundary values.
 
 ---
 
@@ -267,4 +268,4 @@ python smgw_cms_data_extractor.py "your_file.sm_data.xml.cms"
 
 ## License
 
-Please add the license that matches your repository setup, for example MIT.
+MIT
