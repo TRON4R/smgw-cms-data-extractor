@@ -1,6 +1,7 @@
 # smgw-cms-data-extractor
 
 **DE: Python-Skript zur Umwandlung von CMS-Dateien eines Smart Meter Gateways (SMGW/iMSys) in strukturierte Excel- und CSV-Dateien mit Tageswerten**
+
 **EN: Python script to convert German Smart Meter Gateway (aka SMGW/iMSys) cms-files into structured Excel and CSV files with daily values.**
 
 ---
