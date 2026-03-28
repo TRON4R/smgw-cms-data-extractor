@@ -12,7 +12,7 @@
 
 Dieses Skript liest eine CMS-verpackte SMGW-Exportdatei wie zum Beispiel:
 
-`*.sm_data.xml.cms`
+`zaehler_id.sm_data.xml.cms`
 
 Es extrahiert die darin eingebetteten XML-Messdaten, verarbeitet die kumulativen Bezugszählerstände und erzeugt daraus:
 
@@ -56,10 +56,10 @@ Pro Tag werden diese drei kumulativen Bezugszählerstände verwendet:
 
 Daraus werden berechnet:
 
-- **Go-Verbrauch (00:00–05:00)**  
+- **Octopus Go-Verbrauch (00:00–05:00)**  
   `Zählerstand 05:00 - Zählerstand 00:00`
 
-- **Standard-Verbrauch (05:00–24:00)**  
+- **Octopus Standard-Verbrauch (05:00–24:00)**  
   `Zählerstand Folgetag 00:00 - Zählerstand 05:00`
 
 - **Gesamtverbrauch des Tages (00:00–24:00)**  
@@ -79,7 +79,7 @@ wird aber direkt aus den beiden Tagesrandwerten berechnet.
 
 This script reads a CMS-wrapped SMGW export file such as:
 
-`*.sm_data.xml.cms`
+`meter_id.sm_data.xml.cms`
 
 It extracts the embedded XML meter data, parses the cumulative import meter readings, and generates:
 
@@ -123,10 +123,10 @@ For each day it uses these three cumulative import meter readings:
 
 From these values it calculates:
 
-- **Go consumption (00:00–05:00)**  
+- **Octopus Go consumption (00:00–05:00)**  
   `reading at 05:00 - reading at 00:00`
 
-- **Standard consumption (05:00–24:00)**  
+- ****Octopus Standard consumption (05:00–24:00)**  
   `reading at next day's 00:00 - reading at 05:00`
 
 - **Total daily consumption (00:00–24:00)**  
